@@ -1,0 +1,555 @@
+{% extends 'base.html' %}
+{% block title %}Unify Hub | University News{% endblock %}
+{% block content %}
+    <div class="container mx-auto px-4 py-12">
+
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-2">University Newsfeed</h1>
+            <p class="text-lg text-gray-800">Your central source for all campus-wide announcements and stories.</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <section class="mb-12 sticky top-4 z-10">
+            <div class="neubrutalism rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center">
+                <input type="search" placeholder="Search for articles..." class="w-full md:flex-grow p-3 rounded-md input-neubrutalism text-lg">
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4 active">All</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Academics</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Events</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Sports</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Research</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Creator Hub Section -->
+        <section class="mb-12">
+            <div class="neubrutalism rounded-lg p-6">
+                <!-- Create Button -->
+                <div class="mb-6 space-y-4">
+                    {% if user.is_authenticated %}
+                    <div class="flex flex-col sm:flex-row gap-4 w-full">
+                        <button id="create-new-post-btn" class="flex-1 btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#8B5CF6] text-white flex items-center justify-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create New Post
+                        </button>
+                        <button id="create-poll-btn" class="flex-1 btn-neubrutalism font-bold py-4 px-6 text-lg bg-black text-white flex items-center justify-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 4H5m14-8H5" />
+                            </svg>
+                            Create Poll
+                        </button>
+                        {% if is_teacher %}
+                        <button id="create-announcement-btn" class="flex-1 btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#F59E0B] text-black flex items-center justify-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 9V5.25m0 0L9 7.5m2.25-2.25l2.25 2.25M12.75 15v3.75m0 0L15 16.5m-2.25 2.25L10.5 16.5M5.25 12H9m0 0L6.75 9.75M9 12l-2.25 2.25M15 12h3.75m0 0L16.5 9.75M18.75 12l-2.25 2.25" />
+                            </svg>
+                            Create Announcement
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <a href="/auth/" class="w-full text-center btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#8B5CF6] text-white flex items-center justify-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Login to Create Post
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="flex border-b-4 border-black">
+                    <button data-tab="ai-summary" class="hub-tab-btn flex-1 py-3 px-4 font-bold text-lg border-b-4 border-black bg-white text-black">AI Summary</button>
+                    <button data-tab="announcements" class="hub-tab-btn flex-1 py-3 px-4 font-bold text-lg border-b-4 border-transparent text-gray-500">Announcements <span class="hidden sm:inline-block text-xs font-medium bg-red-100 text-red-800 py-1 px-2 rounded-full">Teachers Only</span></button>
+                    <button data-tab="polls" class="hub-tab-btn flex-1 py-3 px-4 font-bold text-lg border-b-4 border-transparent text-gray-500">Polls</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="pt-6">
+                    <!-- AI Summary Content -->
+                    <div id="ai-summary" class="hub-tab-content">
+                        <h3 class="text-3xl font-bold mb-3">Today's News Summary: Sept 17, 2025</h3>
+                        <p class="text-gray-800 text-lg leading-relaxed">
+                            The campus is buzzing with activity. The main focus is the upcoming **Tech Symposium in October**, with the CS department finalizing keynote speakers. In research news, a significant **renewable energy study** has been published by the engineering faculty. For students, **enrollment for the Spring semester** is now officially open. Finally, the university is celebrating a major **championship win** by the soccer team.
+                        </p>
+                    </div>
+                    <!-- Announcements Content -->
+                    <div id="announcements" class="hub-tab-content hidden space-y-4">
+                        {% if is_teacher %}
+                        <p class="text-sm text-gray-700">Only you can see and create your announcements here.</p>
+                        {% endif %}
+                        {% for a in announcements %}
+                        <div class="bg-yellow-50 border-2 border-black p-4 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <div>
+                                <p class="font-bold text-lg">{{ a.title }}</p>
+                                <p class="text-sm text-gray-600">Posted by {{ a.author.first_name|default:a.author.username }}</p>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-500 flex-shrink-0">{{ a.created_at|date:'M d, Y' }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="p-4 border-2 border-dashed border-black rounded-md text-sm text-gray-600">No announcements yet.</div>
+                        {% endfor %}
+                    </div>
+                    <!-- Polls Content -->
+                    <div id="polls" class="hub-tab-content hidden space-y-4">
+                        {% for poll in polls %}
+                        <div class="border-2 border-black p-6 rounded-md">
+                            <p class="font-bold text-xl mb-4">{{ poll.question }}</p>
+                            <form method="POST" action="{% url 'news:poll_vote' poll.id %}" class="space-y-3">
+                                {% csrf_token %}
+                                {% if poll.choice_rows %}
+                                {% for item in poll.choice_rows %}
+                                <label class="block">
+                                    <input type="radio" name="option_index" value="{{ item.idx }}" class="mr-2" {% if poll.user_choice == item.idx %}checked{% endif %} {% if not user.is_authenticated %}disabled{% endif %}>
+                                    <span class="font-medium">{{ item.text }}</span>
+                                </label>
+                                <div class="w-full h-3 bg-gray-200 border-2 border-black rounded">
+                                    <div class="h-full bg-black" style="width: {{ item.pct }}%"></div>
+                                </div>
+                                <div class="text-xs text-gray-600">{{ item.pct }}% ({{ item.count }})</div>
+                                {% endfor %}
+                                {% else %}
+                                {% with opts=poll.options_parsed %}
+                                {% if opts %}
+                                {% for opt in opts %}
+                                <label class="block">
+                                    <input type="radio" name="option_index" value="{{ forloop.counter0 }}" class="mr-2" {% if poll.user_choice == forloop.counter0 %}checked{% endif %} {% if not user.is_authenticated %}disabled{% endif %}>
+                                    <span class="font-medium">{{ opt }}</span>
+                                </label>
+                                <div class="w-full h-3 bg-gray-200 border-2 border-black rounded">
+                                    <div class="h-full bg-black" style="width: 0%"></div>
+                                </div>
+                                <div class="text-xs text-gray-600">0% (0)</div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="p-3 border-2 border-dashed border-black rounded text-sm text-gray-600">No options provided.</div>
+                                {% endif %}
+                                {% endwith %}
+                                {% endif %}
+                                <div class="flex items-center justify-between pt-2">
+                                    <div class="text-xs text-gray-600">Total votes: {{ poll.total_votes }}</div>
+                                    {% if user.is_authenticated %}
+                                    <button type="submit" class="btn-neubrutalism py-2 px-4 font-bold bg-black text-white">Submit Vote</button>
+                                    {% else %}
+                                    <a href="/auth/" class="underline text-sm">Login to vote</a>
+                                    {% endif %}
+                                </div>
+                            </form>
+                            <p class="text-xs text-gray-500 mt-3">By {{ poll.author.first_name|default:poll.author.username }} • {{ poll.created_at|date:'M d, Y' }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="p-4 border-2 border-dashed border-black rounded-md text-sm text-gray-600">No polls yet.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- News Grid -->
+        <section id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {% comment %} Dynamic posts from database {% endcomment %}
+            {% if posts %}
+            {% for post in posts %}
+            <article class="news-card neubrutalism neubrutalism-card rounded-lg overflow-hidden flex flex-col" data-post-id="{{ post.id }}" data-likes="{{ post.likes_count|default:0 }}" data-comments="{{ post.comments_count|default:0 }}">
+                {% if post.image_url %}
+                <img src="{{ post.image_url }}" alt="Image for {{ post.title }}" class="news-image w-full h-48 object-cover border-b-4 border-black">
+                {% else %}
+                <div class="w-full h-48 border-b-4 border-black flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] via-[#EC4899] to-[#F59E0B]">
+                    <span class="text-2xl md:text-3xl font-extrabold text-white text-center px-4 leading-snug tracking-tight line-clamp-3" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                        {{ post.title|default:'Post' }}
+                    </span>
+                </div>
+                {% endif %}
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="mb-4">
+                        <span class="news-category {% if post.category == 'events' %}bg-red-500{% elif post.category == 'research' %}bg-blue-500{% elif post.category == 'academics' %}bg-green-500{% elif post.category == 'sports' %}bg-yellow-500{% else %}bg-gray-500{% endif %} text-white font-bold py-1 px-3 rounded-md text-sm">{{ post.category|upper }}</span>
+                    </div>
+                    <h2 class="news-title text-2xl font-bold mb-2">{{ post.title }}</h2>
+                    <p class="news-excerpt text-gray-700 mb-6 flex-grow">{{ post.content|truncatechars:150 }}</p>
+                    <div class="news-meta text-sm font-semibold text-gray-600 mb-6">
+                        By {{ post.author.first_name|default:post.author.username }} • {{ post.created_at|date:'M d, Y' }}
+                    </div>
+                    <div class="news-full-content hidden">{{ post.content }}</div>
+                    <button class="read-more-btn mt-auto w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg bg-[#8B5CF6] text-white">Read More</button>
+                </div>
+            </article>
+            {% endfor %}
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- News Modal -->
+    <div id="news-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg overflow-hidden w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <div class="relative">
+                <img id="modal-image" src="" alt="News article image" class="w-full h-64 object-cover border-b-4 border-black">
+                <div id="modal-fallback" class="hidden w-full h-64 border-b-4 border-black flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] via-[#EC4899] to-[#F59E0B]">
+                    <span id="modal-fallback-text" class="text-3xl md:text-4xl font-extrabold text-white text-center px-4 leading-snug tracking-tight"></span>
+                </div>
+                <button data-close-modal="news-modal" class="absolute top-4 right-4 bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <div id="modal-content-scroll" class="p-8 overflow-y-auto">
+                <h2 id="modal-title" class="text-4xl font-bold mb-4"></h2>
+                <div id="modal-meta" class="text-md font-semibold text-gray-600 mb-6"></div>
+                <p id="modal-body" class="text-lg text-gray-800 leading-relaxed"></p>
+
+                <!-- Interaction Bar -->
+                <div class="mt-8 pt-6 border-t-4 border-black flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <button id="modal-like-btn" class="flex items-center gap-2 font-bold text-lg hover:text-red-500 transition-colors">
+                            <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                            <span id="modal-like-count">0</span>
+                        </button>
+                        <div class="flex items-center gap-2 font-bold text-lg text-gray-600">
+                           <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+                            <span id="modal-comment-count">0</span>
+                        </div>
+                    </div>
+                    <button id="modal-share-btn" class="btn-neubrutalism py-2 px-4 font-bold flex items-center gap-2">
+                         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 4.186m0-4.186c.114-.092.233-.173.356-.247.122-.074.25-.14.384-.196.133-.056.27-.099.41-.132a2.25 2.25 0 012.13.298c.491.35.796.965.796 1.634v2.853c0 .668-.305 1.284-.796 1.634a2.25 2.25 0 01-2.13.298c-.14.033-.277.076-.41.132-.134.056-.262.122-.384.196a2.25 2.25 0 00-.356.247m0 0a2.25 2.25 0 000 4.186m0-4.186c.114.092.233.173.356.247.122.074.25.14.384.196.133.056.27.099.41.132a2.25 2.25 0 012.13.298c.491.35.796.965.796 1.634v2.853c0 .668-.305 1.284-.796 1.634a2.25 2.25 0 01-2.13.298c-.14.033-.277.076-.41.132-.134.056-.262.122-.384.196a2.25 2.25 0 00-.356.247m0 0a2.25 2.25 0 000-4.186" /></svg>
+                        Share
+                    </button>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="mt-10">
+                    <h3 class="text-3xl font-bold mb-6">Comments</h3>
+                    <!-- Comment Form -->
+                    <form id="comment-form" class="mb-8">
+                        <textarea id="comment-input" class="w-full p-3 rounded-md input-neubrutalism text-lg" rows="3" placeholder="Add your comment..." required></textarea>
+                        <button type="submit" class="mt-3 btn-neubrutalism font-bold py-2 px-5 text-md bg-black text-white">Post Comment</button>
+                    </form>
+                    <!-- Comment List -->
+                    <div id="comment-list" class="space-y-5"><!-- Dynamic comments appear here --></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="create-post-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 class="text-3xl font-bold">Create a New News Post</h2>
+                <button data-close-modal="create-post-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            {% if user.is_authenticated %}
+            <form id="create-post-form" method="POST" action="{% url 'news:create' %}" class="p-8 overflow-y-auto space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="post-title" class="font-bold text-lg">Title</label>
+                    <input type="text" id="post-title" name="title" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label for="post-category" class="font-bold text-lg">Category</label>
+                    <select id="post-category" name="category" class="w-full p-3 mt-2 rounded-md input-neubrutalism bg-white" required>
+                        <option value="academics">Academics</option>
+                        <option value="events">Events</option>
+                        <option value="sports">Sports</option>
+                        <option value="research">Research</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="post-content" class="font-bold text-lg">Full Content</label>
+                    <textarea id="post-content" name="content" rows="6" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required></textarea>
+                </div>
+                <div>
+                    <label for="post-image-url" class="font-bold text-lg">Image URL (optional)</label>
+                    <input type="url" id="post-image-url" name="image_url" placeholder="https://placehold.co/600x400" class="w-full p-3 mt-2 rounded-md input-neubrutalism">
+                </div>
+                <p class="text-sm text-gray-600">Posted as <strong>{{ user.first_name|default:user.username }}</strong></p>
+                <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#8B5CF6] text-white">Submit Post</button>
+            </form>
+            {% else %}
+            <div class="p-8 text-center">
+                <p class="font-medium mb-4">Please <a href="/auth/" class="underline">login</a> to create a post.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_teacher %}
+    <!-- Create Announcement Modal -->
+    <div id="create-announcement-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg w-full max-w-xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 class="text-3xl font-bold">Create Announcement</h2>
+                <button data-close-modal="create-announcement-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <form method="POST" action="{% url 'news:announcement_create' %}" class="p-8 overflow-y-auto space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="a_title" class="font-bold text-lg">Title</label>
+                    <input type="text" id="a_title" name="a_title" maxlength="200" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label for="a_content" class="font-bold text-lg">Content</label>
+                    <textarea id="a_content" name="a_content" rows="5" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required></textarea>
+                </div>
+                <p class="text-xs text-gray-600">Visible only to you.</p>
+                <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#F59E0B] text-black">Save Announcement</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <!-- Create Poll Modal -->
+    <div id="create-poll-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg w-full max-w-xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 class="text-3xl font-bold">Create Poll</h2>
+                <button data-close-modal="create-poll-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <form method="POST" action="{% url 'news:poll_create' %}" class="p-8 overflow-y-auto space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="p_question" class="font-bold text-lg">Question</label>
+                    <input type="text" id="p_question" name="p_question" maxlength="255" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label for="p_options" class="font-bold text-lg">Options (one per line)</label>
+                    <textarea id="p_options" name="p_options" rows="5" class="w-full p-3 mt-2 rounded-md input-neubrutalism" placeholder="Option A
+Option B
+Option C" required></textarea>
+                </div>
+                <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-6 text-lg bg-black text-white">Save Poll</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <footer class="text-center p-8 mt-12 border-t-4 border-black">
+        <p class="font-medium">&copy; 2025 Your University Name. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // --- Generic Modal Handling ---
+        const createNewPostBtn = document.getElementById('create-new-post-btn');
+        const newsGrid = document.getElementById('news-grid');
+        const createPostModal = document.getElementById('create-post-modal');
+        const createPostForm = document.getElementById('create-post-form');
+        const createAnnouncementBtn = document.getElementById('create-announcement-btn');
+        const createPollBtn = document.getElementById('create-poll-btn');
+        
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        // Open poll modal (all auth)
+        if (createPollBtn) {
+            createPollBtn.addEventListener('click', () => openModal('create-poll-modal'));
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Open create post modal
+        if (createNewPostBtn) {
+            createNewPostBtn.addEventListener('click', () => openModal('create-post-modal'));
+        }
+        // Open announcement modal (teacher)
+        if (createAnnouncementBtn) {
+            createAnnouncementBtn.addEventListener('click', () => openModal('create-announcement-modal'));
+        }
+
+        // Generic close button event listener
+        document.querySelectorAll('[data-close-modal]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.getAttribute('data-close-modal');
+                closeModal(modalId);
+            });
+        });
+        
+        // Close modal on background click
+        document.querySelectorAll('.modal-base').forEach(modal => {
+             modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // --- Read More Modal Logic ---
+    const readMoreModal = document.getElementById('news-modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalFallback = document.getElementById('modal-fallback');
+    const modalFallbackText = document.getElementById('modal-fallback-text');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMeta = document.getElementById('modal-meta');
+        const modalBody = document.getElementById('modal-body');
+    const modalLikeBtn = document.getElementById('modal-like-btn');
+        const modalLikeCount = document.getElementById('modal-like-count');
+        const modalCommentCount = document.getElementById('modal-comment-count');
+        const modalShareBtn = document.getElementById('modal-share-btn');
+        let activePostId = null;
+
+        function getCSRFToken() {
+            const name = 'csrftoken=';
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                c = c.trim();
+                if (c.startsWith(name)) return c.substring(name.length);
+            }
+            return '';
+        }
+        const commentForm = document.getElementById('comment-form');
+        const commentInput = document.getElementById('comment-input');
+        const commentList = document.getElementById('comment-list');
+
+        newsGrid.addEventListener('click', (e) => {
+            const readMoreBtn = e.target.closest('.read-more-btn');
+            if (readMoreBtn) {
+                e.preventDefault();
+                const card = readMoreBtn.closest('.news-card');
+                
+                const imgEl = card.querySelector('.news-image');
+                const titleText = card.querySelector('.news-title').textContent;
+                if (imgEl && imgEl.src) {
+                    modalImage.classList.remove('hidden');
+                    modalFallback.classList.add('hidden');
+                    modalImage.src = imgEl.src;
+                } else {
+                    modalImage.classList.add('hidden');
+                    modalFallback.classList.remove('hidden');
+                    modalFallbackText.textContent = titleText;
+                }
+                modalTitle.textContent = titleText;
+                modalMeta.textContent = card.querySelector('.news-meta').textContent;
+                modalBody.textContent = card.querySelector('.news-full-content').textContent;
+                
+                // Populate like and comment counts
+                modalLikeCount.textContent = card.dataset.likes || 0;
+                modalCommentCount.textContent = card.dataset.comments || 0;
+                modalLikeBtn.classList.remove('text-red-500'); // Reset like state
+                activePostId = card.getAttribute('data-post-id') || card.dataset.postId || card.getAttribute('data-id');
+                // Try to load latest comments
+                if (activePostId) {
+                    fetch(`/news/posts/${activePostId}/comments/`, {credentials: 'same-origin'})
+                        .then(r => r.ok ? r.json() : Promise.reject())
+                        .then(({comments}) => {
+                            commentList.innerHTML = '';
+                            comments.forEach(c => {
+                                const html = `
+                                    <div class="flex items-start gap-3">
+                                        <img src="https://placehold.co/48x48/10B981/FFF?text=U" alt="avatar" class="rounded-full border-2 border-black flex-shrink-0">
+                                        <div>
+                                            <p class="font-bold">${c.user}</p>
+                                            <p class="text-gray-800">${c.text}</p>
+                                        </div>
+                                    </div>`;
+                                commentList.insertAdjacentHTML('beforeend', html);
+                            });
+                        }).catch(() => {});
+                }
+                
+                openModal('news-modal');
+            }
+        });
+
+        // Like Button Interaction (persisted)
+        modalLikeBtn.addEventListener('click', () => {
+            if (!activePostId) return;
+            fetch(`/news/posts/${activePostId}/like/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-CSRFToken': getCSRFToken() }
+            }).then(r => r.json()).then(data => {
+                if (data && typeof data.likes !== 'undefined') {
+                    modalLikeCount.textContent = data.likes;
+                    modalLikeBtn.classList.toggle('text-red-500', !!data.liked);
+                }
+            });
+        });
+
+        // Share Button Interaction (persist share)
+        modalShareBtn.addEventListener('click', () => {
+            const originalText = modalShareBtn.innerHTML;
+            modalShareBtn.innerHTML = 'Link Copied!';
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                setTimeout(() => {
+                    modalShareBtn.innerHTML = originalText;
+                }, 2000);
+            });
+            if (activePostId) {
+                fetch(`/news/posts/${activePostId}/share/`, {
+                    method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': getCSRFToken() }
+                });
+            }
+        });
+
+        // Comment Form Submission (persisted)
+        commentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const commentText = commentInput.value.trim();
+            if (!commentText || !activePostId) return;
+            const form = new FormData();
+            form.append('text', commentText);
+            fetch(`/news/posts/${activePostId}/comments/create/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-CSRFToken': getCSRFToken() },
+                body: form,
+            }).then(r => r.json()).then(data => {
+                if (data && data.ok) {
+                    const c = data.comment;
+                    const html = `
+                        <div class="flex items-start gap-3">
+                            <img src="https://placehold.co/48x48/10B981/FFF?text=U" alt="avatar" class="rounded-full border-2 border-black flex-shrink-0">
+                            <div>
+                                <p class="font-bold">${c.user}</p>
+                                <p class="text-gray-800">${c.text}</p>
+                            </div>
+                        </div>`;
+                    commentList.insertAdjacentHTML('afterbegin', html);
+                    commentInput.value = '';
+                    modalCommentCount.textContent = data.count;
+                }
+            });
+        });
+
+        // --- Filter and Tab Logic ---
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        const tabButtons = document.querySelectorAll('.hub-tab-btn');
+        const tabContents = document.querySelectorAll('.hub-tab-content');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-black', 'bg-white', 'text-black');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+                button.classList.add('border-black', 'bg-white', 'text-black');
+                button.classList.remove('border-transparent', 'text-gray-500');
+                tabContents.forEach(content => {
+                    content.id === tabId ? content.classList.remove('hidden') : content.classList.add('hidden');
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+

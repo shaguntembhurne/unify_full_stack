@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}Unify Hub{% endblock %}</title>
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Shared Styles matching landing page -->
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #FDE68A; }
+        .neubrutalism { background:white; border:3px solid black; box-shadow:8px 8px 0 black; transition:.2s; }
+    .btn-neubrutalism { border:3px solid black; box-shadow:5px 5px 0 black; transition:.2s; cursor:pointer; }
+        .btn-neubrutalism:hover { transform:translate(-3px,-3px); box-shadow:8px 8px 0 black; }
+        .btn-neubrutalism:active { transform:translate(5px,5px); box-shadow:none; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="text-black min-h-screen flex flex-col">
+    <!-- Primary Nav (simple placeholder) -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Page Content -->
+    <main class="flex-1">{% block content %}{% endblock %}</main>
+
+    <!-- Footer (optional; can be overridden) -->
+    <footer class="text-center p-8 mt-12 border-t-4 border-black">{% block footer %}<p class="font-medium">&copy; 2025 Unify Hub.</p>{% endblock %}</footer>
+    {% include 'partials/chat_assistant.html' %}
+</body>
+</html>

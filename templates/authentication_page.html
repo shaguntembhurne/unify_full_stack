@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify Hub | Login & Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #FDE68A; /* Warm yellow background */
+        }
+        .neubrutalism {
+            background: white;
+            border: 3px solid black;
+            box-shadow: 8px 8px 0px black;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-neubrutalism {
+            background: white;
+            border: 3px solid black;
+            box-shadow: 5px 5px 0px black;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .btn-neubrutalism:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 8px 8px 0px black;
+        }
+        .btn-neubrutalism:active {
+            transform: translate(5px, 5px);
+            box-shadow: none;
+        }
+        .input-neubrutalism {
+            border: 3px solid black;
+            transition: all 0.2s ease;
+        }
+        .input-neubrutalism:focus {
+            outline: none;
+            box-shadow: 5px 5px 0px black;
+        }
+        .tab-btn.active {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-black">
+
+    {% include 'partials/navbar.html' %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-16 md:py-24 flex items-center justify-center">
+
+        <div class="w-full max-w-md">
+            <div class="neubrutalism rounded-lg p-8 md:p-12">
+                <!-- Tab Navigation -->
+                <div class="flex border-b-4 border-black mb-8">
+                    <button id="login-tab" class="tab-btn flex-1 py-3 font-bold text-xl border-r-4 border-black active">Login</button>
+                    <button id="signup-tab" class="tab-btn flex-1 py-3 font-bold text-xl">Sign Up</button>
+                </div>
+
+                {% if errors %}
+                    <div class="mb-6">
+                        {% for e in errors %}
+                            <div class="neubrutalism p-3 mb-2 bg-red-100 border-red-600">{{ e }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Login Form -->
+                <div id="login-form" {% if active_tab != 'login' %}class="hidden"{% endif %}>
+                    <form method="POST" action="{% url 'premitive:auth' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="login" />
+                        <div class="mb-6">
+                            <label for="login-email" class="block font-bold mb-2">Email Address</label>
+                            <input type="email" id="login-email" name="email" value="{{ request.POST.email }}" class="w-full p-3 rounded-md input-neubrutalism" required>
+                        </div>
+                        <div class="mb-8">
+                            <label for="login-password" class="block font-bold mb-2">Password</label>
+                            <input type="password" id="login-password" name="password" class="w-full p-3 rounded-md input-neubrutalism" required>
+                        </div>
+                        <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-8 text-lg bg-[#8B5CF6] text-white">Login to Your Account</button>
+                    </form>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div id="signup-form" {% if active_tab != 'signup' %}class="hidden"{% endif %}>
+                    <form method="POST" action="{% url 'premitive:auth' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="signup" />
+                        <div class="mb-6">
+                            <label for="signup-name" class="block font-bold mb-2">Full Name</label>
+                            <input type="text" id="signup-name" name="name" value="{{ request.POST.name }}" class="w-full p-3 rounded-md input-neubrutalism" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="signup-email" class="block font-bold mb-2">Email Address</label>
+                            <input type="email" id="signup-email" name="email" value="{{ request.POST.email }}" class="w-full p-3 rounded-md input-neubrutalism" required>
+                        </div>
+                        <div class="mb-6">
+                            <span class="block font-bold mb-2">Role</span>
+                            <label class="inline-flex items-center mr-6">
+                                <input type="radio" name="role" value="student" class="mr-2" {% if request.POST.role != 'teacher' %}checked{% endif %}> Student
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="role" value="teacher" class="mr-2" {% if request.POST.role == 'teacher' %}checked{% endif %}> Teacher
+                            </label>
+                        </div>
+                        <div class="mb-8">
+                            <label for="signup-password" class="block font-bold mb-2">Password</label>
+                            <input type="password" id="signup-password" name="password" class="w-full p-3 rounded-md input-neubrutalism" required>
+                        </div>
+                        <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-8 text-lg bg-[#8B5CF6] text-white">Create Account</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+    
+    <script>
+        const loginTab = document.getElementById('login-tab');
+        const signupTab = document.getElementById('signup-tab');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+        });
+
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('active');
+            loginTab.classList.remove('active');
+            signupForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+    </script>
+
+</body>
+</html>
+
+

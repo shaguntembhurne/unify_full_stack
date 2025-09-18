@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% block title %}Unify Hub | User Profile{% endblock %}
+{% block head %}
+<style>
+    .neubrutalism { background: white; border: 3px solid black; box-shadow: 8px 8px 0px black; transition: all 0.2s ease-in-out; }
+    .neubrutalism-card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0px black; }
+    .btn-neubrutalism { background: white; border: 3px solid black; box-shadow: 5px 5px 0px black; transition: all 0.2s ease; cursor: pointer; }
+    .btn-neubrutalism:hover { transform: translate(-3px, -3px); box-shadow: 8px 8px 0px black; }
+    .btn-neubrutalism:active { transform: translate(5px, 5px); box-shadow: none; }
+    .skill-tag { background-color: #E5E7EB; border: 2px solid black; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; }
+    .modal-base { transition: opacity 0.3s ease; }
+    .input-neubrutalism { border: 3px solid black; transition: all 0.2s ease; }
+    .input-neubrutalism:focus { outline: none; box-shadow: 5px 5px 0px black; }
+</style>
+{% endblock %}
+{% block content %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <div class="neubrutalism rounded-lg p-6 md:p-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <!-- Left Column: Profile Info -->
+                <aside class="lg:col-span-1">
+                    <div class="flex flex-col items-center text-center">
+                        <img id="profile-image" src="{{ profile.image_url|default:'https://placehold.co/200x200/8B5CF6/FFFFFF?text=U' }}" alt="User profile picture" class="w-48 h-48 rounded-full border-4 border-black object-cover mb-4">
+                        <h1 id="profile-name" class="text-4xl font-bold">{{ user.first_name|default:user.username }}</h1>
+                        <p id="profile-domain" class="text-xl text-gray-600 font-medium">{{ profile.domain|default:'Department / Domain' }}</p>
+                        
+                        <button id="edit-profile-btn" class="w-full mt-6 btn-neubrutalism font-bold py-3 px-6 text-lg bg-[#8B5CF6] text-white">Edit Profile</button>
+                        <form method="post" action="{% url 'premitive:logout' %}" class="w-full mt-4">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full btn-neubrutalism font-bold py-3 px-6 text-lg bg-red-500 text-white">Log Out</button>
+                        </form>
+                        
+                        <div class="mt-8 text-left w-full">
+                            <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                On The Web
+                            </h3>
+                            <div id="profile-links" class="space-y-2">
+                                {% if profile.github_url %}<a href="{{ profile.github_url }}" class="font-medium text-blue-600 hover:underline block" target="_blank">GitHub Profile</a>{% endif %}
+                                {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" class="font-medium text-blue-600 hover:underline block" target="_blank">LinkedIn Profile</a>{% endif %}
+                                {% if profile.portfolio_url %}<a href="{{ profile.portfolio_url }}" class="font-medium text-blue-600 hover:underline block" target="_blank">Personal Portfolio</a>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                
+                <!-- Right Column: Details -->
+                <div class="lg:col-span-2">
+                    <!-- About Me Section -->
+                    <section class="mb-10">
+                        <h2 class="text-3xl font-bold border-b-4 border-black pb-2 mb-4">About Me</h2>
+                        <p id="profile-bio" class="text-lg text-gray-800 leading-relaxed">{{ profile.bio|default:"" }}</p>
+                    </section>
+                    
+                    <!-- Skills Section -->
+                    <section class="mb-10">
+                        <h2 class="text-3xl font-bold border-b-4 border-black pb-2 mb-4">My Skills</h2>
+                        <div id="profile-skills-container" class="flex flex-wrap gap-3">
+                            {% for skill in skills_list %}
+                                <span class="skill-tag text-base">{{ skill }}</span>
+                            {% empty %}
+                            {% endfor %}
+                        </div>
+                    </section>
+                    
+                    <!-- My Projects Section -->
+                    <section class="mb-10">
+                        <h2 class="text-3xl font-bold border-b-4 border-black pb-2 mb-4">My Projects</h2>
+                        <div class="space-y-6">
+                            {% for p in my_projects %}
+                            <div class="border-3 border-black rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center transition-all hover:shadow-lg">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-xl font-bold">{{ p.title }}</h3>
+                                        <span class="bg-green-500 text-white font-bold py-1 px-2 rounded-md text-xs">{{ p.get_status_display }}</span>
+                                    </div>
+                                    <p class="text-gray-600 mt-1">{{ p.description|truncatechars:140 }}</p>
+                                </div>
+                                <a href="/projects/" class="btn-neubrutalism font-bold py-2 px-5 text-sm whitespace-nowrap">View Project</a>
+                            </div>
+                            {% empty %}
+                            <p class="text-gray-600">No projects yet. Create one from the Projects page.</p>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <!-- My News Section -->
+                    <section>
+                        <h2 class="text-3xl font-bold border-b-4 border-black pb-2 mb-4">My News</h2>
+                        <div class="space-y-6">
+                            <!-- News Card -->
+                            {% for post in my_news %}
+                            <div class="border-3 border-black rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center transition-all hover:shadow-lg">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-xl font-bold">{{ post.title }}</h3>
+                                        <span class="bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs">{{ post.get_category_display }}</span>
+                                    </div>
+                                    <p class="text-gray-600 mt-1">{{ post.content|truncatechars:140 }}</p>
+                                </div>
+                                <a href="/news/" class="btn-neubrutalism font-bold py-2 px-5 text-sm whitespace-nowrap">View Article</a>
+                            </div>
+                            {% empty %}
+                            <p class="text-gray-600">No news yet. Create one from the News page.</p>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 class="text-3xl font-bold">Edit Your Profile</h2>
+                <button data-close-modal="edit-profile-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <form id="edit-profile-form" class="p-8 overflow-y-auto space-y-6" method="post" action="{% url 'premitive:profile_update' %}">
+                {% csrf_token %}
+                <div>
+                    <label for="form-name" class="font-bold text-lg">Full Name</label>
+                    <input name="name" type="text" id="form-name" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                 <div>
+                    <label for="form-domain" class="font-bold text-lg">Department / Domain</label>
+                    <input name="domain" type="text" id="form-domain" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label for="form-image-url" class="font-bold text-lg">Profile Picture URL</label>
+                    <input name="image_url" type="url" id="form-image-url" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label for="form-bio" class="font-bold text-lg">About Me</label>
+                    <textarea name="bio" id="form-bio" rows="4" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required></textarea>
+                </div>
+                <div>
+                    <label for="form-skills" class="font-bold text-lg">Skills (comma-separated)</label>
+                    <input name="skills" type="text" id="form-skills" placeholder="e.g. Python, UI/UX, Research" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label for="form-github" class="font-bold text-lg">GitHub URL</label>
+                    <input name="github_url" type="url" id="form-github" class="w-full p-3 mt-2 rounded-md input-neubrutalism">
+                </div>
+                <div>
+                    <label for="form-linkedin" class="font-bold text-lg">LinkedIn URL</label>
+                    <input name="linkedin_url" type="url" id="form-linkedin" class="w-full p-3 mt-2 rounded-md input-neubrutalism">
+                </div>
+                <div>
+                    <label for="form-portfolio" class="font-bold text-lg">Portfolio URL</label>
+                    <input name="portfolio_url" type="url" id="form-portfolio" class="w-full p-3 mt-2 rounded-md input-neubrutalism">
+                </div>
+                <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#8B5CF6] text-white">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // --- DOM Elements ---
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const editProfileForm = document.getElementById('edit-profile-form');
+
+        // Profile display elements
+        const profileImage = document.getElementById('profile-image');
+        const profileName = document.getElementById('profile-name');
+        const profileDomain = document.getElementById('profile-domain');
+        const profileBio = document.getElementById('profile-bio');
+        const profileSkillsContainer = document.getElementById('profile-skills-container');
+
+        // Form input elements
+        const formName = document.getElementById('form-name');
+        const formDomain = document.getElementById('form-domain');
+        const formImageUrl = document.getElementById('form-image-url');
+        const formBio = document.getElementById('form-bio');
+        const formSkills = document.getElementById('form-skills');
+
+        // --- Generic Modal Handling ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.querySelectorAll('[data-close-modal]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.getAttribute('data-close-modal');
+                closeModal(modalId);
+            });
+        });
+        
+        document.querySelectorAll('.modal-base').forEach(modal => {
+             modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // --- Edit Profile Logic ---
+        editProfileBtn.addEventListener('click', () => {
+            // Pre-populate form with current profile data
+            formName.value = profileName.textContent;
+            formDomain.value = profileDomain.textContent;
+            formImageUrl.value = profileImage.src;
+            formBio.value = profileBio.textContent.trim();
+            
+            // Convert skill tags back to a comma-separated string
+            const skills = Array.from(profileSkillsContainer.querySelectorAll('.skill-tag')).map(tag => tag.textContent);
+            formSkills.value = skills.join(', ');
+
+            openModal('edit-profile-modal');
+        });
+
+        // Form now posts to backend; let default submission proceed
+    </script>
+{% endblock %}
+

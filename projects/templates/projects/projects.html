@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block title %}Projects | Unify Hub{% endblock %}
+{% block content %}
+    <style>
+        .neubrutalism-card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0px black; }
+        .filter-btn.active { background-color: black; color: white; box-shadow: none; transform: translate(5px, 5px); }
+        .modal-base { transition: opacity 0.3s ease; }
+        .skill-tag { background-color: #E5E7EB; border: 2px solid black; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; }
+    </style>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-12">
+
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-2">Project Showcase</h1>
+            <p class="text-lg text-gray-800">Discover, collaborate, and create. Find your next project here.</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <section class="mb-12 sticky top-4 z-10">
+            <div class="neubrutalism rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center">
+                <input type="search" placeholder="Search for projects by skill or title..." class="w-full md:flex-grow p-3 rounded-md input-neubrutalism text-lg">
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4 active">All</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Tech</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Arts</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Science</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Business</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Project Button -->
+        <section class="mb-12">
+            <button id="create-new-project-btn" class="w-full btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#8B5CF6] text-white flex items-center justify-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Create New Project
+            </button>
+        </section>
+
+        <!-- Projects Grid -->
+        <section id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {% for project in projects %}
+            <article class="project-card neubrutalism neubrutalism-card rounded-lg flex flex-col">
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="project-title text-2xl font-bold">{{ project.title }}</h2>
+                        <span class="project-status {% if project.status == 'recruiting' %}bg-green-500{% elif project.status == 'in_progress' %}bg-blue-500{% else %}bg-gray-600{% endif %} text-white font-bold py-1 px-3 rounded-md text-sm whitespace-nowrap">{{ project.get_status_display }}</span>
+                    </div>
+                    <p class="project-excerpt text-gray-700 mb-4 flex-grow">{{ project.description|truncatechars:160 }}</p>
+                    <div class="mb-4">
+                        <h4 class="font-bold mb-2">Skills Needed:</h4>
+                        <div class="project-skills flex flex-wrap gap-2">
+                            {% for s in project.skills_list %}
+                                <span class="skill-tag">{{ s }}</span>
+                            {% empty %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="project-meta text-sm font-semibold text-gray-600 mb-6">
+                        Posted by {{ project.author.first_name|default:project.author.username }}
+                    </div>
+                    <div class="project-full-content hidden">{{ project.description }}</div>
+                <div class="mt-auto flex gap-4">
+                    <button class="view-details-btn w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg">View Details</button>
+                    {% if user.is_authenticated %}
+                    <form method="POST" action="{% url 'projects:join' project.id %}" class="w-full">
+                      {% csrf_token %}
+                      <button type="submit" class="w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg bg-black text-white">Join Project</button>
+                    </form>
+                    {% else %}
+                    <a href="/auth/" class="w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg bg-black text-white">Login to Join</a>
+                    {% endif %}
+                </div>
+                </div>
+            </article>
+            {% empty %}
+            {% endfor %}
+        </section>
+    </div>
+
+    <!-- Project Details Modal -->
+    <div id="project-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg overflow-hidden w-full max-w-3xl max-h-[90vh] flex flex-col">
+             <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 id="project-modal-title" class="text-3xl font-bold"></h2>
+                <button data-close-modal="project-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto">
+                <div id="project-modal-meta" class="text-md font-semibold text-gray-600 mb-4"></div>
+                <div class="mb-6">
+                    <h4 class="font-bold text-lg mb-2">Skills Needed:</h4>
+                    <div id="project-modal-skills" class="flex flex-wrap gap-2"></div>
+                </div>
+                <h4 class="font-bold text-lg mb-2">Project Description:</h4>
+                <p id="project-modal-body" class="text-lg text-gray-800 leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div id="create-project-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 class="text-3xl font-bold">Create a New Project</h2>
+                <button data-close-modal="create-project-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <form id="create-project-form" class="p-8 overflow-y-auto space-y-6" method="post" action="{% url 'projects:create' %}">
+                {% csrf_token %}
+                <div>
+                    <label for="project-title-input" class="font-bold text-lg">Project Title</label>
+                    <input name="title" type="text" id="project-title-input" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required>
+                </div>
+                <div>
+                    <label class="font-bold text-lg">Status</label>
+                    <select name="status" class="w-full p-3 mt-2 rounded-md input-neubrutalism">
+                        <option value="recruiting">Recruiting</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="project-skills-input" class="font-bold text-lg">Skills Needed (comma-separated)</label>
+                    <input name="skills" type="text" id="project-skills-input" placeholder="e.g., Python, UI/UX, Research" class="w-full p-3 mt-2 rounded-md input-neubrutalism">
+                </div>
+                 <div>
+                    <label for="project-description-input" class="font-bold text-lg">Full Description</label>
+                    <textarea name="description" id="project-description-input" rows="6" class="w-full p-3 mt-2 rounded-md input-neubrutalism" required></textarea>
+                </div>
+                <button type="submit" class="w-full btn-neubrutalism font-bold py-4 px-6 text-lg bg-[#8B5CF6] text-white">Submit Project</button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Generic Modal Handling ---
+        const createNewProjectBtn = document.getElementById('create-new-project-btn');
+        
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        createNewProjectBtn.addEventListener('click', () => openModal('create-project-modal'));
+
+        document.querySelectorAll('[data-close-modal]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.getAttribute('data-close-modal');
+                closeModal(modalId);
+            });
+        });
+        
+        document.querySelectorAll('.modal-base').forEach(modal => {
+             modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+
+        // --- View Details Modal Logic ---
+        const projectGrid = document.getElementById('project-grid');
+        const modalTitle = document.getElementById('project-modal-title');
+        const modalMeta = document.getElementById('project-modal-meta');
+        const modalBody = document.getElementById('project-modal-body');
+        const modalSkills = document.getElementById('project-modal-skills');
+
+        projectGrid.addEventListener('click', (e) => {
+            const detailsBtn = e.target.closest('.view-details-btn');
+            if (detailsBtn) {
+                e.preventDefault();
+                const card = detailsBtn.closest('.project-card');
+                
+                modalTitle.textContent = card.querySelector('.project-title').textContent;
+                modalMeta.textContent = card.querySelector('.project-meta').textContent;
+                modalBody.textContent = card.querySelector('.project-full-content').textContent;
+                
+                // Populate skills
+                modalSkills.innerHTML = '';
+                const skills = card.querySelectorAll('.skill-tag');
+                skills.forEach(skill => {
+                    modalSkills.innerHTML += `<span class="skill-tag">${skill.textContent}</span>`;
+                });
+                
+                openModal('project-modal');
+            }
+        });
+
+        // --- Create Project Logic ---
+        // Form now posts to backend; no client-side injection
+
+        // --- Filter Logic ---
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    </script>
+{% endblock %}

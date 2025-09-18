@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify Hub | University News & Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #FDE68A; /* Warm yellow background */
+        }
+        .neubrutalism {
+            background: white;
+            border: 3px solid black;
+            box-shadow: 8px 8px 0px black;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-neubrutalism {
+            background: white;
+            border: 3px solid black;
+            box-shadow: 5px 5px 0px black;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .btn-neubrutalism:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 8px 8px 0px black;
+        }
+        .btn-neubrutalism:active {
+            transform: translate(5px, 5px);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="text-black">
+
+    {% include 'partials/navbar.html' %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-16 md:py-24">
+
+        <!-- Hero Section -->
+        <section class="text-center">
+            <h2 class="text-5xl md:text-7xl font-bold mb-4">The Single Source of Truth for Campus Innovation.</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-800 mb-10">
+                Stay updated with the latest university news and explore groundbreaking student & faculty projects, all in one place.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="{% url 'premitive:auth' %}" class="w-full sm:w-auto btn-neubrutalism font-bold py-4 px-8 text-lg bg-[#8B5CF6] text-white text-center">Explore Projects</a>
+                <a href="{% url 'premitive:auth' %}" class="w-full sm:w-auto btn-neubrutalism font-bold py-4 px-8 text-lg text-center">Read Latest News</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="explore" class="py-20 md:py-28">
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+                <!-- Feature 1: Centralized News -->
+                <div id="news" class="neubrutalism p-8 rounded-lg">
+                    <svg class="mx-auto h-12 w-12 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" /></svg>
+                    <h3 class="text-2xl font-bold mb-2">Centralized Newsfeed</h3>
+                    <p class="text-gray-700">No more searching through department sites. Get all official announcements, events, and updates in one unified feed.</p>
+                </div>
+                <!-- Feature 2: Project Showcase -->
+                <div id="projects" class="neubrutalism p-8 rounded-lg">
+                    <svg class="mx-auto h-12 w-12 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 22.25l-.648-1.688a2.25 2.25 0 01-1.48-1.48L12.75 18l1.688-.648a2.25 2.25 0 011.48 1.48l.648 1.688z" /></svg>
+                    <h3 class="text-2xl font-bold mb-2">Project Showcase</h3>
+                    <p class="text-gray-700">A dynamic portfolio for all university projects. Discover research, find collaborators, and see the incredible work happening on campus.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 md:py-28 text-center">
+             <h2 class="text-4xl md:text-5xl font-bold text-center mb-12">How It Works</h2>
+             <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center">
+                <div class="flex flex-col items-center">
+                    <div class="neubrutalism rounded-full w-24 h-24 flex items-center justify-center text-4xl font-bold mb-4">1</div>
+                    <h3 class="text-xl font-bold">Discover</h3>
+                    <p class="text-gray-700">Browse the latest news or filter through projects by department, status, or technology.</p>
+                </div>
+                <div class="text-gray-400 hidden md:block text-6xl">→</div>
+                <div class="flex flex-col items-center">
+                    <div class="neubrutalism rounded-full w-24 h-24 flex items-center justify-center text-4xl font-bold mb-4">2</div>
+                     <h3 class="text-xl font-bold">Connect</h3>
+                    <p class="text-gray-700">Find projects that need your skills or connect with team members and faculty leads.</p>
+                </div>
+                 <div class="text-gray-400 hidden md:block text-6xl">→</div>
+                 <div class="flex flex-col items-center">
+                    <div class="neubrutalism rounded-full w-24 h-24 flex items-center justify-center text-4xl font-bold mb-4">3</div>
+                     <h3 class="text-xl font-bold">Create</h3>
+                    <p class="text-gray-700">Join a team, contribute to groundbreaking research, and bring innovative ideas to life.</p>
+                </div>
+             </div>
+        </section>
+
+        <!-- Final Call to Action -->
+        <section class="py-20">
+            <div class="neubrutalism rounded-lg p-10 md:p-16 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Ready to Dive In?</h2>
+                <p class="max-w-xl mx-auto text-lg text-gray-800 mb-10">
+                    Your next great idea or collaboration is just a click away.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <a href="{% url 'premitive:auth' %}" class="w-full sm:w-auto btn-neubrutalism font-bold py-4 px-8 text-lg bg-[#8B5CF6] text-white text-center">Find a Project</a>
+                    <a href="{% url 'premitive:auth' %}" class="w-full sm:w-auto btn-neubrutalism font-bold py-4 px-8 text-lg text-center">View Campus News</a>
+                </div>
+            </div>
+        </section>
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-8 mt-12 border-t-4 border-black">
+        <p class="font-medium">&copy; 2025 Your University Name. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
+

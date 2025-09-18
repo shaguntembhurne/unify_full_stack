@@ -1,0 +1,154 @@
+<style>
+    #chat-widget-container .neubrutalism { background:white; border:3px solid black; box-shadow:8px 8px 0px black; transition:all .2s ease-in-out; }
+    #chat-widget-container .btn-neubrutalism { border:3px solid black; box-shadow:5px 5px 0px black; transition:all .2s ease; cursor:pointer; }
+    #chat-widget-container .btn-neubrutalism:hover { transform:translate(-3px,-3px); box-shadow:8px 8px 0px black; }
+    #chat-widget-container .btn-neubrutalism:active { transform:translate(5px,5px); box-shadow:none; }
+    #chat-widget-container .input-neubrutalism { border:3px solid black; transition:all .2s ease; }
+    #chat-widget-container .input-neubrutalism:focus { outline:none; box-shadow:5px 5px 0px black; }
+    @keyframes pulse { 0%,100%{ transform:scale(1); box-shadow:5px 5px 0px #8B5CF6;} 50%{ transform:scale(1.05); box-shadow:8px 8px 0px #8B5CF6;} }
+    #chat-bubble { animation:pulse 2.5s infinite ease-in-out; }
+</style>
+
+<div id="chat-widget-container" class="fixed bottom-5 right-5 z-50">
+    <button id="chat-bubble" class="bg-white w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center btn-neubrutalism border-4 border-black" style="box-shadow: 5px 5px 0px #8B5CF6;" aria-label="Open AI Assistant">
+        <svg class="w-8 h-8 sm:w-12 sm:h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 9V8C16 5.23858 13.7614 3 11 3C8.23858 3 6 5.23858 6 8V9" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 12C14.7614 12 17 14.2386 17 17C17 18.8163 15.8163 20.354 14.276 20.8499L12 20L9.72399 20.8499C8.18373 20.354 7 18.8163 7 17C7 14.2386 9.23858 12 12 12Z" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="10.5" cy="16.5" r="1" fill="#8B5CF6" stroke="black" stroke-width="0.5"/>
+            <circle cx="13.5" cy="16.5" r="1" fill="#8B5CF6" stroke="black" stroke-width="0.5"/>
+        </svg>
+    </button>
+
+    <div id="chat-window" class="hidden absolute bottom-24 right-0 w-80 sm:w-96 neubrutalism rounded-lg flex flex-col bg-white" style="height: 520px;">
+        <div class="p-4 border-b-4 border-black bg-[#FDE68A]">
+            <h3 class="font-bold text-xl">Unify AI Assistant</h3>
+            <p class="text-sm text-gray-700">Your campus knowledge expert.</p>
+        </div>
+        <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-4">
+            <div class="p-3 bg-gray-100 rounded-lg max-w-xs border-2 border-black">
+                <p class="font-bold text-sm mb-1 text-[#8B5CF6]">Unify AI</p>
+                <p>Hello! Ask me anything about university news, projects, or people.</p>
+            </div>
+        </div>
+        <div class="px-4 pb-2">
+            <div class="flex flex-wrap gap-2">
+                <button class="text-xs sm:text-sm px-2 py-1 btn-neubrutalism" data-suggest="How many interesting news are there today?"># Count today’s news</button>
+                <button class="text-xs sm:text-sm px-2 py-1 btn-neubrutalism" data-suggest="Summarize today's news in 5 bullet points."># Summary of today</button>
+                <button class="text-xs sm:text-sm px-2 py-1 btn-neubrutalism" data-suggest="What projects use Python?"># Projects using Python</button>
+                <button class="text-xs sm:text-sm px-2 py-1 btn-neubrutalism" data-suggest="Any teacher announcements today?"># Teacher announcements</button>
+            </div>
+        </div>
+        <form id="chat-form" class="p-4 border-t-4 border-black flex gap-2">
+            <input id="chat-input" type="text" placeholder="Ask a question..." class="flex-grow p-2 input-neubrutalism rounded-md">
+            <button type="submit" class="btn-neubrutalism p-2 bg-black text-white rounded-md" aria-label="Send">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chatBubble = document.getElementById('chat-bubble');
+    const chatWindow = document.getElementById('chat-window');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function addMessage(text, sender, isTyping = false) {
+        const messageWrapper = document.createElement('div');
+        if (sender === 'user') {
+            messageWrapper.className = 'flex justify-end';
+            messageWrapper.innerHTML = `
+                <div class="p-3 bg-[#8B5CF6] text-white rounded-lg max-w-xs border-2 border-black">
+                    <p>${text}</p>
+                </div>`;
+        } else {
+            messageWrapper.className = 'flex justify-start';
+            messageWrapper.innerHTML = `
+                <div class="p-3 bg-gray-100 rounded-lg max-w-xs border-2 border-black">
+                    <p class="font-bold text-sm mb-1 text-[#8B5CF6]">Unify AI</p>
+                    <p>${text}</p>
+                </div>`;
+            if (isTyping) messageWrapper.id = 'typing-indicator';
+        }
+        chatMessages.appendChild(messageWrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function updateLastMessage(text) {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            const aiText = typingIndicator.querySelector('p:last-child');
+            aiText.textContent = text;
+            typingIndicator.id = '';
+        }
+    }
+
+    async function askBackend(message) {
+        const lower = message.toLowerCase();
+        const csrftoken = getCookie('csrftoken');
+        const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+        if (csrftoken) headers['X-CSRFToken'] = csrftoken;
+
+        try {
+            // Route to the best endpoint based on question intent
+            if (lower.includes('today') && lower.includes('news') && (lower.includes('how many') || lower.includes('count'))) {
+                const resp = await fetch('/ai/news/qa/today/', { method: 'POST', headers, body: new URLSearchParams({ q: message }) });
+                if (resp.status === 401) return 'Please log in to use the assistant.';
+                const data = await resp.json();
+                return data.answer || 'No answer available.';
+            }
+            if (lower.includes("summary") && lower.includes('today')) {
+                const resp = await fetch('/ai/news/summary/today/');
+                if (resp.status === 401) return 'Please log in to use the assistant.';
+                const data = await resp.json();
+                return data.summary || 'No summary available.';
+            }
+            // Default to general RAG chat
+            const resp = await fetch('/ai/chat/', { method: 'POST', headers, body: new URLSearchParams({ q: message }) });
+            if (resp.status === 401) return 'Please log in to use the assistant.';
+            const data = await resp.json();
+            return data.answer || 'No answer available.';
+        } catch (e) {
+            return 'There was an error contacting the AI service.';
+        }
+    }
+
+    chatBubble.addEventListener('click', () => {
+        chatWindow.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('[data-suggest]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const q = btn.getAttribute('data-suggest');
+            chatInput.value = q;
+            chatForm.dispatchEvent(new Event('submit'));
+        });
+    });
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+        addMessage(message, 'user');
+        chatInput.value = '';
+        addMessage('...', 'ai', true);
+        const answer = await askBackend(message);
+        updateLastMessage(answer);
+    });
+</script>

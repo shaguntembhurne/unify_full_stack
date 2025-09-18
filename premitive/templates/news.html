@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify Hub | University News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #FDE68A; }
+        .neubrutalism { background: white; border:3px solid black; box-shadow:8px 8px 0 black; transition:.2s; }
+        .neubrutalism-card:hover { transform:translate(-4px,-4px); box-shadow:12px 12px 0 black; }
+        .btn-neubrutalism { background:white; border:3px solid black; box-shadow:5px 5px 0 black; transition:.2s; cursor:pointer; }
+        .btn-neubrutalism:hover { transform:translate(-3px,-3px); box-shadow:8px 8px 0 black; }
+        .btn-neubrutalism:active { transform:translate(5px,5px); box-shadow:none; }
+        .input-neubrutalism { border:3px solid black; transition:.2s; }
+        .input-neubrutalism:focus { outline:none; box-shadow:5px 5px 0 black; }
+        .filter-btn.active { background:black; color:white; box-shadow:none; transform:translate(5px,5px); }
+    </style>
+</head>
+<body class="text-black">
+    <header class="p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-4xl font-extrabold">Unify Hub</a>
+            <nav class="hidden md:flex items-center space-x-6 font-medium text-lg">
+                <a href="/news/" class="bg-black text-white py-2 px-4 rounded-md border-2 border-black">News</a>
+                <a href="#" class="hover:underline">Projects</a>
+                <a href="/auth/" class="hover:underline">Account</a>
+            </nav>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-2">University Newsfeed</h1>
+            <p class="text-lg text-gray-800">Your central source for all campus-wide announcements and stories.</p>
+        </div>
+        <section class="mb-12 sticky top-4 z-10">
+            <div class="neubrutalism rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center">
+                <input type="search" placeholder="Search for articles..." class="w-full md:flex-grow p-3 rounded-md input-neubrutalism text-lg" />
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4 active">All</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Academics</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Events</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Sports</button>
+                    <button class="filter-btn btn-neubrutalism font-bold py-2 px-4">Research</button>
+                </div>
+            </div>
+        </section>
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {% comment %} Static placeholder cards {% endcomment %}
+            <article class="neubrutalism neubrutalism-card rounded-lg overflow-hidden flex flex-col">
+                <img src="https://placehold.co/600x400/FDE68A/000000?text=Campus+Event" alt="Campus Event" class="w-full h-48 object-cover border-b-4 border-black" />
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="mb-4"><span class="bg-red-500 text-white font-bold py-1 px-3 rounded-md text-sm">EVENTS</span></div>
+                    <h2 class="text-2xl font-bold mb-2">Annual Tech Symposium Announced for October</h2>
+                    <p class="text-gray-700 mb-6 flex-grow">The CS department reveals dates and keynote speakers for this year's Tech Symposium.</p>
+                    <div class="text-sm font-semibold text-gray-600 mb-6">By Staff • Sep 16, 2025</div>
+                    <a href="#" class="mt-auto w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg bg-[#8B5CF6] text-white">Read More</a>
+                </div>
+            </article>
+            <article class="neubrutalism neubrutalism-card rounded-lg overflow-hidden flex flex-col">
+                <img src="https://placehold.co/600x400/8B5CF6/FFFFFF?text=Research" alt="Research" class="w-full h-48 object-cover border-b-4 border-black" />
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="mb-4"><span class="bg-blue-500 text-white font-bold py-1 px-3 rounded-md text-sm">RESEARCH</span></div>
+                    <h2 class="text-2xl font-bold mb-2">New Study on Renewable Energy Published</h2>
+                    <p class="text-gray-700 mb-6 flex-grow">Breakthrough results on solar efficiency published in a leading journal.</p>
+                    <div class="text-sm font-semibold text-gray-600 mb-6">By Dr. Carter • Sep 15, 2025</div>
+                    <a href="#" class="mt-auto w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg bg-[#8B5CF6] text-white">Read More</a>
+                </div>
+            </article>
+            <article class="neubrutalism neubrutalism-card rounded-lg overflow-hidden flex flex-col">
+                <img src="https://placehold.co/600x400/F59E0B/FFFFFF?text=Academics" alt="Academics" class="w-full h-48 object-cover border-b-4 border-black" />
+                <div class="p-6 flex flex-col flex-grow">
+                    <div class="mb-4"><span class="bg-green-500 text-white font-bold py-1 px-3 rounded-md text-sm">ACADEMICS</span></div>
+                    <h2 class="text-2xl font-bold mb-2">Enrollment for Spring Semester Now Open</h2>
+                    <p class="text-gray-700 mb-6 flex-grow">Registrar opens enrollment for Spring 2026—review key dates now.</p>
+                    <div class="text-sm font-semibold text-gray-600 mb-6">By Registrar • Sep 14, 2025</div>
+                    <a href="#" class="mt-auto w-full text-center btn-neubrutalism font-bold py-3 px-6 text-lg bg-[#8B5CF6] text-white">Read More</a>
+                </div>
+            </article>
+        </section>
+    </main>
+    <footer class="text-center p-8 mt-12 border-t-4 border-black">
+        <p class="font-medium">&copy; 2025 Unify Hub. All Rights Reserved.</p>
+    </footer>
+    <script>
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => btn.addEventListener('click', () => {
+            filterButtons.forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+        }));
+    </script>
+</body>
+</html>
