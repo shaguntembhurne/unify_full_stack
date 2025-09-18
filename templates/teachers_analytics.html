@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Unify Hub | Teacher Analytics{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+    <div class="container mx-auto px-4 py-12">
+
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-2">Teacher Dashboard</h1>
+            <p class="text-lg text-gray-800">Track the performance of your content.</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Total Views -->
+            <div class="neubrutalism rounded-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-gray-600">Total Views</h3>
+                <p class="text-5xl font-extrabold mt-2">12,845</p>
+            </div>
+            <!-- Total Posts -->
+            <div class="neubrutalism rounded-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-gray-600">Total Posts</h3>
+                <p class="text-5xl font-extrabold mt-2">26</p>
+            </div>
+            <!-- Engagement Rate -->
+            <div class="neubrutalism rounded-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-gray-600">Avg. Engagement</h3>
+                <p class="text-5xl font-extrabold mt-2">7.2%</p>
+            </div>
+            <!-- New Followers -->
+            <div class="neubrutalism rounded-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-gray-600">New Followers</h3>
+                <p class="text-5xl font-extrabold mt-2">+19</p>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="mb-12">
+            <div class="neubrutalism rounded-lg p-6">
+                 <h2 class="text-3xl font-bold mb-4">Views Over Last 7 Days</h2>
+                <canvas id="viewsChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Post Performance Table -->
+        <section>
+            <div class="neubrutalism rounded-lg p-6">
+                <h2 class="text-3xl font-bold mb-4">Post Performance</h2>
+                <div class="overflow-x-auto">
+                    <div class="min-w-full">
+                        <!-- Table Header -->
+                        <div class="flex font-bold text-left border-b-4 border-black pb-2 text-gray-600">
+                            <div class="w-2/5 p-2">POST TITLE</div>
+                            <div class="w-1/5 p-2">CATEGORY</div>
+                            <div class="w-1/5 p-2 text-center">VIEWS</div>
+                            <div class="w-1/5 p-2 text-center">DATE</div>
+                        </div>
+                        <!-- Table Body -->
+                        <div class="space-y-4 mt-4">
+                            <!-- Table Row 1 -->
+                            <div class="flex items-center bg-gray-50 rounded-md border-2 border-black p-3 hover:bg-gray-100 transition-colors">
+                                <div class="w-2/5 font-bold">Mid-term exam schedule for PHY-101</div>
+                                <div class="w-1/5"><span class="bg-green-500 text-white font-bold py-1 px-2 rounded-md text-xs">ACADEMICS</span></div>
+                                <div class="w-1/5 font-bold text-center">1,204</div>
+                                <div class="w-1/5 font-medium text-center text-gray-600">Sept 17, 2025</div>
+                            </div>
+                            <!-- Table Row 2 -->
+                            <div class="flex items-center bg-gray-50 rounded-md border-2 border-black p-3 hover:bg-gray-100 transition-colors">
+                                <div class="w-2/5 font-bold">Guest lecture on Quantum Computing</div>
+                                <div class="w-1/5"><span class="bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs">EVENTS</span></div>
+                                <div class="w-1/5 font-bold text-center">876</div>
+                                <div class="w-1/5 font-medium text-center text-gray-600">Sept 16, 2025</div>
+                            </div>
+                             <!-- Table Row 3 -->
+                            <div class="flex items-center bg-gray-50 rounded-md border-2 border-black p-3 hover:bg-gray-100 transition-colors">
+                                <div class="w-2/5 font-bold">New Research on Renewable Energy</div>
+                                <div class="w-1/5"><span class="bg-blue-500 text-white font-bold py-1 px-2 rounded-md text-xs">RESEARCH</span></div>
+                                <div class="w-1/5 font-bold text-center">2,531</div>
+                                <div class="w-1/5 font-medium text-center text-gray-600">Sept 15, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const ctx = document.getElementById('viewsChart').getContext('2d');
+        const viewsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Sept 11', 'Sept 12', 'Sept 13', 'Sept 14', 'Sept 15', 'Sept 16', 'Today'],
+                datasets: [{
+                    label: 'Total Views',
+                    data: [650, 920, 810, 1120, 1530, 1280, 1750],
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderColor: 'rgba(139, 92, 246, 1)',
+                    borderWidth: 4,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: 'black',
+                    pointBorderColor: 'black',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        },
+                         border: {
+                            display: false,
+                        },
+                    },
+                    x: {
+                         grid: {
+                            display: false
+                        },
+                         border: {
+                            display: false,
+                        },
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

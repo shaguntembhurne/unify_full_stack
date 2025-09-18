@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}Unify Hub | Calendar{% endblock %}
+{% block head %}
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <style>
+        .modal-base { transition: opacity 0.3s ease; }
+        /* --- FullCalendar Theming --- */
+        #calendar-container { padding: 2rem; }
+        .fc .fc-button-primary { background: white !important; border: 3px solid black !important; color: black !important; box-shadow: 5px 5px 0px black !important; font-weight: bold !important; text-transform: uppercase !important; border-radius: 6px !important; transition: all 0.2s ease !important; }
+        .fc .fc-button-primary:hover { transform: translate(-3px, -3px) !important; box-shadow: 8px 8px 0px black !important; }
+        .fc .fc-button-primary:active, .fc .fc-button-primary:focus { transform: translate(5px, 5px) !important; box-shadow: none !important; }
+        .fc .fc-button-primary:not(:disabled).fc-button-active { background: black !important; color: white !important; transform: translate(5px, 5px) !important; box-shadow: none !important; }
+        .fc .fc-toolbar-title { font-weight: 700; font-size: 2.25rem !important; }
+        .fc.fc-view-harness { border: 3px solid black; background: white; }
+        .fc-theme-standard .fc-scrollgrid { border: none !important; }
+        .fc .fc-col-header-cell { border-bottom: 3px solid black !important; font-weight: 700 !important; padding: 1rem 0; background: #f3f4f6; }
+        .fc-theme-standard td, .fc-theme-standard th { border: 1px solid #000 !important; }
+        .fc-event { border: 2px solid black !important; font-weight: 600 !important; padding: 3px 5px !important; cursor: pointer; transition: all 0.2s ease !important; }
+        .fc-event:hover { transform: scale(1.05); }
+        .fc .fc-day-today { background-color: #FEF3C7 !important; }
+        .fc-list-event-title { white-space: normal !important; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <main class="container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-2">Unify Calendar</h1>
+            <p class="text-lg text-gray-800">Your central hub for all university events and deadlines.</p>
+        </div>
+
+        <div id="calendar-container" class="neubrutalism rounded-lg">
+            <div id="calendar"></div>
+        </div>
+
+        <section class="mt-12">
+            <div class="neubrutalism rounded-lg p-6">
+                <h2 class="text-3xl font-bold mb-4">Calendar Legend</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div class="flex items-center gap-3"><div class="w-6 h-6 rounded border-2 border-black bg-[#EF4444]"></div><span class="font-bold">Exams</span></div>
+                    <div class="flex items-center gap-3"><div class="w-6 h-6 rounded border-2 border-black bg-[#8B5CF6]"></div><span class="font-bold">Hackathons & Events</span></div>
+                    <div class="flex items-center gap-3"><div class="w-6 h-6 rounded border-2 border-black bg-[#F59E0B]"></div><span class="font-bold">Deadlines</span></div>
+                    <div class="flex items-center gap-3"><div class="w-6 h-6 rounded border-2 border-black bg-[#10B981]"></div><span class="font-bold">Lectures</span></div>
+                    <div class="flex items-center gap-3"><div class="w-6 h-6 rounded border-2 border-black bg-[#6B7280]"></div><span class="font-bold">Holidays</span></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Event Detail Modal -->
+    <div id="event-modal" class="modal-base hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="neubrutalism rounded-lg w-full max-w-lg">
+            <div class="flex justify-between items-center p-6 border-b-4 border-black">
+                <h2 id="modal-title" class="text-3xl font-bold">Event Details</h2>
+                <button data-close-modal="event-modal" class="bg-white text-black rounded-full h-10 w-10 flex items-center justify-center border-2 border-black font-extrabold text-xl">&times;</button>
+            </div>
+            <div id="modal-body" class="p-8 space-y-4"></div>
+        </div>
+    </div>
+    <script>
+      // --- Modal Handling ---
+      function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+      }
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+      }
+      document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+      });
+      document.getElementById('event-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'event-modal') closeModal('event-modal');
+      });
+
+      // --- FullCalendar Logic ---
+      document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        const modalTitleEl = document.getElementById('modal-title');
+        const modalBodyEl = document.getElementById('modal-body');
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+          },
+          editable: true,
+          events: [
+            {
+              title: 'Mid-term Exams',
+              start: '2025-09-22',
+              end: '2025-09-26',
+              backgroundColor: '#EF4444',
+              display: 'background'
+            },
+            {
+              title: 'Project Phoenix Hackathon',
+              start: '2025-09-19T18:00:00',
+              end: '2025-09-21T18:00:00',
+              backgroundColor: '#8B5CF6',
+              extendedProps: { description: 'A 48-hour hackathon focused on building projects for social good.' }
+            },
+            {
+              title: 'Course Registration Deadline',
+              start: '2025-09-12',
+              allDay: true,
+              backgroundColor: '#F59E0B',
+               extendedProps: { description: 'Final day to add or drop courses for the Fall semester.' }
+            },
+            {
+              title: 'Guest Lecture: AI Ethics',
+              start: '2025-09-18T14:00:00',
+              backgroundColor: '#10B981',
+               extendedProps: { description: 'A special lecture by Dr. Evelyn Reed on the ethical implications of modern AI.' }
+            },
+            {
+              title: 'University Holiday',
+              start: '2025-09-02',
+              allDay: true,
+              backgroundColor: '#6B7280',
+            },
+            {
+              title: 'Annual Tech Symposium',
+              start: '2025-10-15',
+              end: '2025-10-17',
+              backgroundColor: '#8B5CF6',
+              extendedProps: { description: 'The yearly symposium for the Computer Science department, featuring industry speakers.' }
+            },
+            {
+              title: 'Final Project Submissions',
+              start: '2025-10-31',
+              allDay: true,
+              backgroundColor: '#F59E0B',
+              extendedProps: { description: 'All final year projects must be submitted by 11:59 PM.' }
+            }
+          ],
+          eventClick: function(info) {
+            info.jsEvent.preventDefault(); // Prevent browser navigation
+
+            modalTitleEl.textContent = info.event.title;
+
+            let content = `<p class="font-bold text-lg">Start:</p><p>${info.event.start.toLocaleString()}</p>`;
+            if (info.event.end) {
+                 content += `<p class="font-bold text-lg mt-2">End:</p><p>${info.event.end.toLocaleString()}</p>`;
+            }
+            if (info.event.extendedProps.description) {
+                content += `<p class="font-bold text-lg mt-2">Details:</p><p>${info.event.extendedProps.description}</p>`;
+            }
+
+            modalBodyEl.innerHTML = content;
+            openModal('event-modal');
+          }
+        });
+        calendar.render();
+      });
+    </script>
+{% endblock %}
+

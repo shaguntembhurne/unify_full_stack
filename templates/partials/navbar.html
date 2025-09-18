@@ -4,7 +4,11 @@
     <nav class="hidden md:flex items-center space-x-6 font-medium">
       <a href="/news/" class="hover:underline">News</a>
   <a href="/projects/" class="hover:underline">Projects</a>
-      <a href="#how-it-works" class="hover:underline">How It Works</a>
+  <a href="/#how-it-works" class="hover:underline">How It Works</a>
+  <a href="{% url 'premitive:calendar' %}" class="hover:underline {% if request.resolver_match and request.resolver_match.url_name == 'calendar' %}font-bold underline{% endif %}">Calendar</a>
+      {% if user.is_authenticated and user.profile and user.profile.role == 'teacher' %}
+        <a href="{% url 'premitive:teachers_analytics' %}" class="hover:underline">Teacher Analytics</a>
+      {% endif %}
     </nav>
     <div class="flex items-center gap-3">
       {% if user.is_authenticated %}
